@@ -1,0 +1,13 @@
+.DS_Store
+.dub
+.git
+*.ttf
+Fonts
+*.txt
+*.json
+*.png
+*.ini
+Misc
+candlecount
+Items
+minstart
