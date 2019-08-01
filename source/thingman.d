@@ -1,6 +1,5 @@
 module thingman;
 
-//#crashed program - parallel
 //#Triangle
 
 import base, thing;
@@ -160,11 +159,8 @@ struct ThingMan {
 	}
 
 	void process() {
-		thgs.each!((ref t) => t.process);
-		//#crashed program - parallel
-		//import std.parallelism;
-		//foreach(ref t; thgs.parallel)
-		//	t.process;
+		import std.parallelism : parallel;
+		thgs.parallel.each!((ref t) => t.process);
 	}
 
 	void draw() {
