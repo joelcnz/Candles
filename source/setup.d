@@ -1,4 +1,4 @@
-module setup;
+module psetup;
 
 import base;
 
@@ -8,42 +8,36 @@ private:
     string _settingsFileName;
     string _current;
 public:
-    int setup(string[] args = []) {
-        import jec, jmisc;
+    int psetup(string[] args = []) {
+        import jecsdl, jmisc;
 
         setSettingsFileName("settings.ini");
         assert(fileNameExists, _settingsFileName ~ " not found");
         loadSettings;
 
-        g_window = new RenderWindow(VideoMode.getDesktopMode,
-                            "Welcome to Candles! Press [T] for terminal, Press [System] + [Q] to quit");
-
-        g_font = new Font;
-        g_font.loadFromFile("DejaVuSans.ttf");
-        if (! g_font) {
-            import std.stdio;
-            writeln("Font not load");
-            return -1;
+        //SCREEN_WIDTH = 640; SCREEN_HEIGHT = 480;
+        //SCREEN_WIDTH = 2560; SCREEN_HEIGHT = 1600;
+        SCREEN_WIDTH = 1280; SCREEN_HEIGHT = 800;
+        if (setup("Poorly Programmed Producions - Presents: Vac Space",
+            SCREEN_WIDTH, SCREEN_HEIGHT,
+            SDL_WINDOW_SHOWN
+            //SDL_WINDOW_OPENGL
+            //SDL_WINDOW_FULLSCREEN_DESKTOP
+            //SDL_WINDOW_FULLSCREEN
+            ) != 0) {
+            writeln("Init failed");
+            return 1;
         }
 
-        g_checkPoints = true;
-        if (jec.setup != 0) {
-            import std.stdio : writefln;
-
-            writefln("Error function: %s, Line: %s", __FUNCTION__, __LINE__);
-            return -1;
-        }
-
-        g_inputJex = new InputJex(/* position */ Vector2f(0, g_window.getSize.y - 32),
-                            /* font size */ 12,
-                            /* header */ "Enter 'help': ",
-                            /* Type (oneLine, or history) */ InputType.history);
+        const ifontSize = 12;
+        jx = new InputJex(Point(0, SCREEN_HEIGHT - ifontSize - ifontSize / 4), ifontSize, "'help' for help>",
+            InputType.history);
     
-        g_inputJex.addToHistory(""d);
+        jx.addToHistory(""d);
 
         //g_thgs.setup;
 
-        g_mode = Mode.edit;
+        //g_mode = Mode.edit;
     	g_terminal = true;
 
         return 0;
@@ -51,6 +45,8 @@ public:
 
     void shutdown() {
         saveSettings;
+        SDL_DestroyRenderer(gRenderer),
+        SDL_Quit();
     }
     
     void setSettingsFileName(in string fileName) {
@@ -60,10 +56,11 @@ public:
     bool fileNameExists() {
         import std.file : exists;
 
-        if (! exists(_settingsFileName))
-            return false;
-        else
-            return true;
+        return exists(_settingsFileName); 
+        //if (! exists(_settingsFileName))
+        //    return false;
+        //else
+        //    return true;
     }
 
     void saveSettings() {

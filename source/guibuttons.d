@@ -1,3 +1,4 @@
+//#it repeats!
 module guibuttons;
 
 import base;
@@ -14,15 +15,19 @@ struct GuiButtons {
     }
 
     void process(out string item) {
-        auto pos = Mouse.getPosition(g_window);
-        auto cursor = Point(pos.x, pos.y);
+        int mx, my;
+        SDL_GetMouseState(&mx, &my);
+        auto cursor = Point(mx, my);
 
         foreach(ref wedget; _wedgets) with(wedget) {
             process;
             if (gotFocus(cursor)) {
                 _focus = Focus.on;
-                if (g_keys[Keyboard.Key.V].keyTrigger) {
+                //if (g_keys[SDL_SCANCODE_V].keyTrigger) {
+                if (gEvent.type == SDL_MOUSEBUTTONDOWN) {
                     item = txtHead;
+                    //#it repeats!
+                    //while(gEvent.type == SDL_MOUSEBUTTONDOWN) { SDL_GetMouseState(&mx, &my); }
                 }
             } else {
                 _focus = Focus.off;

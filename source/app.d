@@ -14,12 +14,11 @@ import std.math, std.file, std.range;
 
 import base, thing, thingman;
 
-Texture texture;
+Image texture;
 
 int main(string[] args) {
-	if (g_setup.setup(args) != 0) {
+	if (g_setup.psetup(args) != 0) {
 		gh("Setup error, aborting...");
-		g_window.close;
 
 		return -1;
 	}
@@ -27,14 +26,15 @@ int main(string[] args) {
 	scope(exit)
 		g_setup.shutdown;
 
-	g_window.setFramerateLimit(120);
+//	g_window.setFramerateLimit(120);
 	
 	// load a image file for ozbject
-	texture = new Texture;
-	loadItem(g_image);	
-	
+//	texture = new Texture;
+	loadItem(g_image);
+//	texture = Image(g_image);
+
 	// Setup picture let sprite object using texture object
-	g_sprite = new Sprite(texture);
+//	g_sprite = new Sprite(texture);
 
 	bool _input;
 	
@@ -42,11 +42,12 @@ int main(string[] args) {
 	thgs.setup;
 
 	Wedget[] itemWedgets;
-	itemWedgets ~= new Wedget("objects", Rect!float(20,20,300, 20));
+	itemWedgets ~= new Wedget("objects", JRectangle(SDL_Rect(20,20,300, 20), BoxStyle.solid, SDL_Color(255,128,0)));
 	foreach(y, label; g_items) {
 		import std.path;
-		itemWedgets ~= new Button("button", Rect!float(20,45 + y * 25,300, 20),
-			label.stripExtension.baseName.to!dstring);
+
+		itemWedgets ~= new Button(label, JRectangle(SDL_Rect(20,45 + cast(int)y * 25,300, 20), BoxStyle.solid, SDL_Color(255,128,0)),
+			label.stripExtension.baseName.to!string);
 	}
 
 	g_guiButtons.setup(itemWedgets);
@@ -55,26 +56,22 @@ int main(string[] args) {
 		list = ["Graphic button list:"];
 		focusAble = false;
 	}
-
-    while(g_window.isOpen())
+	int mx, my;
+	bool done = false;
+    while(! done)
     {
-        Event event;
-
-        while(g_window.pollEvent(event))
-        {
-            if(event.type == event.EventType.Closed)
-            {
-                g_window.close();
-            }
-        }
-
-		if ((Keyboard.isKeyPressed(Keyboard.Key.LSystem) || Keyboard.isKeyPressed(Keyboard.Key.RSystem)) &&
-			Keyboard.isKeyPressed(Keyboard.Key.Q)) {
-			g_window.close;
+		//Handle events on queue
+		while( SDL_PollEvent( &gEvent ) != 0 ) {
+			//User requests quit
+			if (gEvent.type == SDL_QUIT)
+				done = true;
 		}
 
+		SDL_PumpEvents();
+		SDL_GetMouseState(&mx, &my);
+
 		if (! _input) {
-			if (g_keys[Keyboard.Key.Space].keyInput) {
+			if (g_keys[SDL_SCANCODE_SPACE].keyInput) {
 				if (g_order == Phase.lineUp) {
 					g_order = Phase.circle;
 					thgs.setupOrder;
@@ -87,7 +84,7 @@ int main(string[] args) {
 				}
 			}
 
-			if (g_keys[Keyboard.Key.T].keyInput) {
+			if (g_keys[SDL_SCANCODE_T].keyInput) {
 				_input = ! _input;
 			}
 		}
@@ -127,7 +124,8 @@ int main(string[] args) {
 					["Commands:",
 						"cls/clear - clear above",
 						"n/number # - change number of things",
-						"t - close input", "quit - exit Candles",
+						"t - close input",
+						"quit - exit Candles",
 						"r - rotate/not rotate toggle",
 						"list - list items",
 						"load # - load item",
@@ -179,8 +177,8 @@ int main(string[] args) {
 						break;
 					}
 
-					thgs.centre( Point(sp[number * 2] * g_window.size.x,
-						sp[number * 2 + 1] * g_window.size.y));
+					thgs.centre( Point(sp[number * 2] * SCREEN_WIDTH,
+						sp[number * 2 + 1] * SCREEN_HEIGHT));
 				break;
 				case "id":
 					g_showNum = ! g_showNum;// == false ? true : false;
@@ -210,7 +208,7 @@ int main(string[] args) {
 					jx.addToHistory("What?");
 				break;
 				case "q", "quit":
-					g_window.close;
+					done = true;
 				break;
 				case "r":
 					g_rotate = ! g_rotate;
@@ -232,14 +230,17 @@ int main(string[] args) {
 				loadItem(item);
 		}
 
-		g_window.clear;
+        SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0x00);
+        SDL_RenderClear(gRenderer);
+
 		thgs.draw;
 		if (_input)
 			jx.draw;
 		if (g_guiButtonsToggle)
 			g_guiButtons.draw;
-    	g_window.display;
-    }
+
+    	SDL_RenderPresent(gRenderer);
+    } // while ! done
 	
 	return 0;
 }
@@ -256,13 +257,14 @@ void loadItem(in string itemFile) {
 			fileex = fnex;
 	}
 	".jpg .png".split.each!(fn => ifexists(fn));
-	if (! texture.loadFromFile(buildPath("Items", itemFile ~ fileex))) {
-		(itemFile ~ " - fail .. fatal error").gh;
+	immutable wholeName = buildPath("Items", itemFile ~ fileex);
+	if (! exists(wholeName)) {
+		(wholeName ~ " - fail").gh;
 		return; // if file missing or some thing it closes the program (maybe should put 'window.close;')
 	}
 	
 	// Setup picture let sprite object using texture object
-	g_sprite = new Sprite(texture);
-	jx.addToHistory(text("Loaded ", itemFile));
+	g_sprite = Image(wholeName);
+	jx.addToHistory(text("Loaded ", wholeName));
 	g_image = itemFile;
 }

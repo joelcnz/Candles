@@ -10,21 +10,21 @@ struct ThingMan {
 	AimState _aimState;
 
 	void setup() {
-		_middlePos = Point(g_window.size.x / 2, g_window.size.y / 2);
+		_middlePos = Point(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 		setupOrder;
 		//_aimState = AimState.uniform; //#not work
 		_aimState = AimState.normal;
 	}
 
 	void spread() {
-		int total = g_window.size.x * g_window.size.y;
+		int total = SCREEN_WIDTH * SCREEN_HEIGHT;
 		int unit = total / g_age;
 		int x,y;
 		//foreach(n; iota(0,total,unit)) {
 		int t, count = unit / 2;
 		loop1: foreach(a; 0 .. total) {
 			x += 1;
-			if (x > g_window.size.x) {
+			if (x > SCREEN_WIDTH) {
 				y += 1;
 				x = 0;
 			}
@@ -58,7 +58,7 @@ struct ThingMan {
 			case Phase.point:
 				if (thgs.length < g_age)
 					foreach(a; 0 .. g_age)
-						thgs ~= Thing(0, _middlePos, _middlePos);
+						thgs ~= Thing(a, _middlePos, _middlePos);
 				else
 					foreach(id, ref t; thgs) {
 					 	t = Thing(cast(int)id + 1, thgs[id].pos, _middlePos);
@@ -67,7 +67,7 @@ struct ThingMan {
 			break;
 			case Phase.lineUp:
 				int id = 1;
-				auto pos = Point(g_sprite.getLocalBounds.width / 2, g_sprite.getLocalBounds.height / 2);
+				auto pos = Point(g_sprite.mRect.w / 2, g_sprite.mRect.h / 2);
 				if (thgs.length < g_age)
 					foreach(a; 0 .. g_age)
 						thgs ~= Thing(id, _middlePos, _middlePos);
@@ -76,8 +76,8 @@ struct ThingMan {
 					thgs[i] = Thing(id, thgs[i].pos, pos);
 					thgs[i].aim(_aimState);
 					pos.X += xstep;
-					if (pos.X + g_sprite.getLocalBounds.width / 2 > g_window.size.x) {
-						pos.X = g_sprite.getLocalBounds.width / 2;
+					if (pos.X + g_sprite.mRect.w / 2 > SCREEN_WIDTH) {
+						pos.X = g_sprite.mRect.w / 2;
 						pos.Y += ystep;
 					}
 					id += 1;
@@ -95,7 +95,7 @@ struct ThingMan {
 					immutable pibynum = ((PI * 2) / g_age) * num0;
 					dx = _middlePos.X + sin(pibynum) * g_radiusw;
 					dy = _middlePos.Y + cos(pibynum) * g_radiush;
-					xyaim(&ax, &ay, getAngle(thgs[i].pos.X, thgs[i].pos.Y,
+					xyaim(ax, ay, getAngle(thgs[i].pos.X, thgs[i].pos.Y,
 						dx,dy));
 					
 					// find the furtherest from homr

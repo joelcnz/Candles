@@ -9,8 +9,8 @@ private:
 	Point _pos, _destPos, _dir;
 	float _angle = 0f;
 	bool _atDest;
-	Text _txtid;
-	//static int _markerID = 1;
+	JText _txtid;
+	static int _markerID = 1;
 	int _id;
 public:
 	Point pos() { return _pos; }
@@ -24,21 +24,24 @@ public:
 		_pos = pos0;
 		_destPos = destPos0;
 		_dir = dir;
-		//_id = _markerID;
-		//_markerID += 1;
+		_id = _markerID;
+		_markerID += 1;
 		_id = id;
-		_txtid = new Text(text(_id), g_font, 30);
+		//this(string message, SDL_Rect r, SDL_Color col, int fontSize, string fileName) {
+
+		//_txtid = JText(text(_id), SDL_Rect(0,0,0,0), SDL_Color(255,255,255), 20, "DejaVuSans.ttf");
+		//_id.gh;
 	}
 
 	void aim(AimState state, Point max = Point(0,0)) {
 		float ax, ay;
 		final switch(state) {
 			case AimState.normal:
-				xyaim(&ax, &ay, getAngle(_pos.X, _pos.Y, _destPos.X, _destPos.Y));
+				xyaim(ax, ay, getAngle(_pos.X, _pos.Y, _destPos.X, _destPos.Y));
 				_dir = Point(ax, ay);
 			break;
 			case AimState.uniform:
-				xyaim(&ax, &ay, getAngle(_pos.X, _pos.Y, _destPos.X, _destPos.Y));
+				xyaim(ax, ay, getAngle(_pos.X, _pos.Y, _destPos.X, _destPos.Y));
 				_dir = Point(ax * max.X, ay * max.Y);
 			break;
 		}
@@ -65,20 +68,21 @@ public:
 		if (justNum) {
 			//_txtid.position = Vector2f(_pos.X - g_sprite.getLocalBounds.width + (g_sprite.getLocalBounds.width + _txtid.getLocalBounds.width) / 2 ,
 			//_pos.Y + g_sprite.getLocalBounds.height / 2);
-			_txtid.position = Vector2f(_pos.X - g_sprite.getLocalBounds.width + (g_sprite.getLocalBounds.width + _txtid.getLocalBounds.width) / 2,
-				(_pos.Y - g_sprite.getLocalBounds.height + (g_sprite.getLocalBounds.height + _txtid.getLocalBounds.height) / 2));
-			g_window.draw(_txtid);
-
+			/+
+			_txtid.pos = Point(_pos.X - SCREEN_WIDTH + (g_sprite.mRect.w + _txtid.mRect.w) / 2,
+				(_pos.Y - g_sprite.mRect.h + (g_sprite.mRect.h + _txtid.mRect.h) / 2));
+			_txtid.draw(gRenderer);
+			+/
 			return;
 		}
-		g_sprite.position = Vector2f(_pos.X, _pos.Y);
-		g_sprite.origin = Vector2f(g_sprite.getLocalBounds.width / 2, g_sprite.getLocalBounds.height / 2);
-		g_sprite.rotation = _angle;
+		g_sprite.pos = Point(_pos.X, _pos.Y);
+		//g_sprite.origin = Vector2f(g_sprite.getLocalBounds.width / 2, g_sprite.getLocalBounds.height / 2);
+		//g_sprite.rotation = _angle;
 		version(PopUps) {
 			if (_atDest)
-				g_window.draw(g_sprite);
+				g_sprite.draw;
 		} else {
-			g_window.draw(g_sprite);
+			g_sprite.draw;
 			//if (g_showNum)
 			//	g_window.draw(_txtid);
 		}

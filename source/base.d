@@ -3,19 +3,16 @@ module base;
 public:
 import std.stdio, std.conv, std.algorithm, std.string;
 
-import dsfml.window;
-import dsfml.graphics;
-import dsfml.audio;
+import jecsdl, dini.dini, jmisc;
 
-import jec, dini.dini, jmisc;
-
-import setup, guibuttons;
+import psetup, guibuttons;
 
 Setup g_setup;
+int gFontSize = 12;
 
 alias jx = g_inputJex;
 
-Sprite g_sprite;
+Image g_sprite;
 
 enum Phase {point, lineUp, circle, triangle, square}
 enum AimState {normal, uniform}
@@ -38,9 +35,10 @@ bool g_guiButtonsToggle;
 
 string[] g_items;
 
-static this() {
+shared static this() {
     import std.file;
+    import std.path;
 
     foreach(string name; dirEntries("Items", "*.{png,jpg}", SpanMode.shallow))
-        g_items ~= name;
+        g_items ~= name.baseName.stripExtension;
 }
